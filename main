@@ -1,0 +1,36 @@
+import pandas as pd
+import openai
+
+df = pd.read_csv('BTCMP.csv')
+user_ids = df['ID'].tolist()
+user_name = df['name'].tolist()
+
+users = [ {'id': id, 'name' : name} for id, name in zip (user_ids, user_name) ]
+
+
+openai_api_key = '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'
+openai.api_key = openai_api_key
+
+def generate_ai_news(user):
+  completion = openai.ChatCompletion.create(  
+  model="gpt-3.5-turbo",
+  messages=[
+    {
+      "role": "system", "content": "Vocễ é um especialista em marketing bancário."
+      },
+      {
+        "role": "user", "content": f"Crie uma mensagem com o nome do usuário {user['name']} sobre a importância de investir (máximo de 100 caracteres)"
+        }
+  ] 
+  ) 
+  return completion.choices[0].message.content.strip('\"')
+
+generated_news = []
+
+for user in users:
+  news = generate_ai_news(user)
+  generated_news.append(news)
+  
+   
+df['generated_news'] = generated_news
+df.to_csv('BTCMP.csv', index=False)
